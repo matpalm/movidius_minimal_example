@@ -2,6 +2,7 @@
 
 import mvnc.mvncapi as mvnc
 import numpy as np
+import data
 
 # enable full verbose debugging
 mvnc.SetGlobalOption(mvnc.GlobalOption.LOGLEVEL, 2)
@@ -17,17 +18,16 @@ device.OpenDevice()
 binary_graph = open('graph.mv', 'rb' ).read()
 graph = device.AllocateGraph(binary_graph)
 
-# make some dummy data. note: non batched
-dummy_data = np.random.random(size=(64, 64, 5, 3)).astype(np.float16)
-
-# run through NCS
-graph.LoadTensor(dummy_data, 'arbitrary_user_tag')
-output, user_object = graph.GetResult()
-assert user_object == 'arbitrary_user_tag'
-print(output.shape, output[:10])
-
-print("debug", graph.GetGraphOption(mvnc.GraphOption.DEBUG_INFO))
-print("time taken", graph.GetGraphOption(mvnc.GraphOption.TIME_TAKEN))
+# run -ve example through NCS
+for t, tag in [(data.NEG_TENSOR, 'neg'),
+               (data.POS_TENSOR, 'pos'),
+               (np.zeros((64, 64, 3)).astype(np.float16), 'zeros'),
+               (np.ones((64, 64, 3)).astype(np.float16), 'ones')]:
+  graph.LoadTensor(t, '')
+  output, _user_object = graph.GetResult()
+  print(tag, output)
+#  print("debug", graph.GetGraphOption(mvnc.GraphOption.DEBUG_INFO))
+#  print("time taken", graph.GetGraphOption(mvnc.GraphOption.TIME_TAKEN))
 
 # cleanup
 graph.DeallocateGraph()
