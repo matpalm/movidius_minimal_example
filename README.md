@@ -19,7 +19,7 @@ python3 -m tensorflow.python.tools.freeze_graph \
 --output_graph graph.frozen.pb
 ```
 
-3. check the behaviour of the frozen graph by loading it up and running
+3. check the behaviour of the frozen graph by loading it up and running, on host machine,
 the two examples we trained on as well as a tensor of just zeros and
 a tensor of just ones.
 
@@ -37,7 +37,7 @@ ones prediction [[ 0.34015185]]
 mvNCCompile graph.frozen.pb -in imgs -on output -o graph.mv
 ```
 
-5. test inference by running same two examples we used for training the model
+5. test inference on compute stick by running same two examples we used for training the model
 
 ```
 ./test_inference_on_ncs.py
