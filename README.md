@@ -89,6 +89,20 @@ test inference by running same two examples we used for training the model
 
 ```
 ./test_inference_on_ncs.py
+./test_inference_on_ncs.py:8: DeprecationWarning: "LOGLEVEL" is deprecated. Please use "LOG_LEVEL"!
+  mvnc.SetGlobalOption(mvnc.GlobalOption.LOGLEVEL, 2)
+Device 0 Address: 2 - VID/PID 03e7:2150
+Starting wait for connect with 2000ms timeout
+Found Address: 2 - VID/PID 03e7:2150
+Found EP 0x81 : max packet size is 512 bytes
+Found EP 0x01 : max packet size is 512 bytes
+Found and opened device
+Performing bulk write of 865724 bytes...
+Successfully sent 865724 bytes of data in 75.076813 ms (10.996987 MB/s)
+Boot successful, device address 2
+Found Address: 2 - VID/PID 03e7:f63b
+done
+Booted 2 -> VSC
 neg [ 0.41625977]
 pos [ 0.40869141]
 zeros [ 0.53710938]
