@@ -5,7 +5,7 @@ import numpy as np
 import data
 
 # enable full verbose debugging
-mvnc.SetGlobalOption(mvnc.GlobalOption.LOGLEVEL, 2)
+mvnc.SetGlobalOption(mvnc.GlobalOption.LOG_LEVEL, 2)
 
 # open handle to NCS
 devices = mvnc.EnumerateDevices()

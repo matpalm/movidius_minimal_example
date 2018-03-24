@@ -93,8 +93,6 @@ test inference by running same two examples we used for training the model
 
 ```
 ./test_inference_on_ncs.py
-./test_inference_on_ncs.py:8: DeprecationWarning: "LOGLEVEL" is deprecated. Please use "LOG_LEVEL"!
-  mvnc.SetGlobalOption(mvnc.GlobalOption.LOGLEVEL, 2)
 Device 0 Address: 2 - VID/PID 03e7:2150
 Starting wait for connect with 2000ms timeout
 Found Address: 2 - VID/PID 03e7:2150
