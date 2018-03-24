@@ -1,6 +1,6 @@
 # minimal tensorflow conv net -> movidius neural compute stick example
 
-train a simple model, overfitting like crazy on two examples.
+1. train a simple model, overfitting like crazy on two examples.
 this generates a single ckpt in `ckpt` directory and exports
 pbtxt version of graph to `graph.pbtxt`
 
@@ -8,7 +8,7 @@ pbtxt version of graph to `graph.pbtxt`
 ./train_and_export_graph.py
 ```
 
-freeze graph; compiles graph def and checkpoint into frozen graph def single file `graph.frozen.pb`
+2. freeze graph; compiles graph def and checkpoint into frozen graph def single file `graph.frozen.pb`
 
 ```
 python3 -m tensorflow.python.tools.freeze_graph \
@@ -19,7 +19,7 @@ python3 -m tensorflow.python.tools.freeze_graph \
 --output_graph graph.frozen.pb
 ```
 
-check the behaviour of the frozen graph by loading it up and running
+3. check the behaviour of the frozen graph by loading it up and running
 the two examples we trained on as well as a tensor of just zeros and
 a tensor of just ones.
 
@@ -30,6 +30,36 @@ a tensor of just ones.
 zeros prediction [[ 0.50239927]]
 ones prediction [[ 0.34015185]]
 ```
+
+4. convert the tensorflow frozen graph into one loadable onto compute stick (`graph.mv`)
+
+```
+mvNCCompile graph.frozen.pb -in imgs -on output -o graph.mv
+```
+
+5. test inference by running same two examples we used for training the model
+
+```
+./test_inference_on_ncs.py
+Device 0 Address: 2 - VID/PID 03e7:2150
+Starting wait for connect with 2000ms timeout
+Found Address: 2 - VID/PID 03e7:2150
+Found EP 0x81 : max packet size is 512 bytes
+Found EP 0x01 : max packet size is 512 bytes
+Found and opened device
+Performing bulk write of 865724 bytes...
+Successfully sent 865724 bytes of data in 75.076813 ms (10.996987 MB/s)
+Boot successful, device address 2
+Found Address: 2 - VID/PID 03e7:f63b
+done
+Booted 2 -> VSC
+neg [ 0.00258064]
+pos [ 0.99707031]
+zeros [ 0.50146484]
+ones [ 0.33764648]
+```
+
+# graph layout
 
 ```
 python3 -m tensorflow.python.tools.freeze_graph --clear_devices --input_graph graph.pbtxt --input_checkpoint ckpt/dummy_ckpt --output_node_names output --output_graph graph.frozen.pb
@@ -83,38 +113,11 @@ fully_connected/BiasAdd (BiasAdd): [fully_connected/MatMul, fully_connected/bias
 output (Sigmoid): [fully_connected/BiasAdd]
 ```
 
-convert the tensorflow frozen graph into one loadable onto compute stick (`graph.mv`)
-
-```
-mvNCCompile graph.frozen.pb -in imgs -on output -o graph.mv
-```
-
-test inference by running same two examples we used for training the model
-
-```
-./test_inference_on_ncs.py
-Device 0 Address: 2 - VID/PID 03e7:2150
-Starting wait for connect with 2000ms timeout
-Found Address: 2 - VID/PID 03e7:2150
-Found EP 0x81 : max packet size is 512 bytes
-Found EP 0x01 : max packet size is 512 bytes
-Found and opened device
-Performing bulk write of 865724 bytes...
-Successfully sent 865724 bytes of data in 75.076813 ms (10.996987 MB/s)
-Boot successful, device address 2
-Found Address: 2 - VID/PID 03e7:f63b
-done
-Booted 2 -> VSC
-neg [ 0.00258064]
-pos [ 0.99707031]
-zeros [ 0.50146484]
-ones [ 0.33764648]
-```
-
 # gotchas
 
 noticed so far...
 
+* export frozen graph as batch_size=1; NCS runs without batching
 * can't have less a conv layer with `num_outputs` < 8 (or silent fail, inference rubbish numbers)
 * everything must be `np.float16` (or else suffer NaN)
 * can't have `padding='VALID'` (or crash)
