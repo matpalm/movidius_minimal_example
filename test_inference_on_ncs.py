@@ -21,9 +21,9 @@ graph = device.AllocateGraph(binary_graph)
 # run -ve example through NCS
 for t, tag in [(data.NEG_TENSOR, 'neg'),
                (data.POS_TENSOR, 'pos'),
-               (np.zeros((64, 64, 3)).astype(np.float16), 'zeros'),
-               (np.ones((64, 64, 3)).astype(np.float16), 'ones')]:
-  graph.LoadTensor(t, '')
+               (np.zeros((64, 64, 3)), 'zeros'),
+               (np.ones((64, 64, 3)), 'ones')]:
+  graph.LoadTensor(t.astype(np.float16), '')
   output, _user_object = graph.GetResult()
   print(tag, output)
 #  print("debug", graph.GetGraphOption(mvnc.GraphOption.DEBUG_INFO))
