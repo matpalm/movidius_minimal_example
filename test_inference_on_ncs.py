@@ -5,30 +5,34 @@ import numpy as np
 import data
 
 # enable full verbose debugging
-mvnc.SetGlobalOption(mvnc.GlobalOption.LOG_LEVEL, 2)
+#mvnc.global_set_option(mvnc.global_set_option.LOG_LEVEL, 2)
 
 # open handle to NCS
-devices = mvnc.EnumerateDevices()
+devices = mvnc.enumerate_devices()
 if len(devices) == 0:
   raise Exception("no compute stick?")
 device = mvnc.Device(devices[0])
-device.OpenDevice()
+device.open()
 
 # load graph onto device
 binary_graph = open('graph.mv', 'rb' ).read()
-graph = device.AllocateGraph(binary_graph)
+graph = mvnc.Graph('g')
+input_fifo, output_fifo = graph.allocate_with_fifos(device, binary_graph)
 
-# run -ve example through NCS
-for t, tag in [(data.NEG_TENSOR, 'neg'),
-               (data.POS_TENSOR, 'pos'),
-               (np.zeros((64, 64, 3)), 'zeros'),
-               (np.ones((64, 64, 3)), 'ones')]:
-  graph.LoadTensor(t.astype(np.float16), '')
-  output, _user_object = graph.GetResult()
-  print(tag, output)
-#  print("debug", graph.GetGraphOption(mvnc.GraphOption.DEBUG_INFO))
-#  print("time taken", graph.GetGraphOption(mvnc.GraphOption.TIME_TAKEN))
+def run_on_ncs(input):
+  graph.queue_inference_with_fifo_elem(input_fifo, output_fifo,
+                                       np.float32(input), None)
+  output, _user_object = output_fifo.read_elem()
+  return output
 
-# cleanup
-graph.DeallocateGraph()
-device.CloseDevice()
+ncs_positive_prediction = run_on_ncs(data.POS_TENSOR)
+ncs_negative_prediction = run_on_ncs(data.NEG_TENSOR)
+print("ncs_positive_prediction", ncs_positive_prediction.shape, ncs_positive_prediction)
+print("ncs_negative_prediction", ncs_negative_prediction.shape, ncs_negative_prediction)
+
+input_fifo.destroy()
+output_fifo.destroy()
+graph.destroy()
+device.close()
+device.destroy()
+
