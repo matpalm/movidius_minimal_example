@@ -118,6 +118,5 @@ output (Sigmoid): [fully_connected/BiasAdd]
 noticed so far...
 
 * export frozen graph as batch_size=1; NCS runs without batching
-* can't have less a conv layer with `num_outputs` < 8 (or silent fail, inference rubbish numbers)
-* everything must be `np.float16` (or else suffer NaN)
 * can't have `padding='VALID'` (or crash)
+* incorrect shape/size is set for model output tensor if 2d. see [this forum post](https://ncsforum.movidius.com/discussion/1128/incorrect-shape-size-set-for-2d-output-tensor)
