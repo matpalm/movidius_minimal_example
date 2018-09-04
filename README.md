@@ -117,6 +117,7 @@ output (Sigmoid): [fully_connected/BiasAdd]
 
 noticed so far...
 
+* upsampling must be done with transpose convolution as opposed to nearest neighbour upsampling (since no resize op)
 * export frozen graph as batch_size=1; NCS runs without batching
 * must have `padding='VALID'` (i.e. SAME will give lots of problems)
 * incorrect shape/size is set for model output tensor if 2d. see [this forum post](https://ncsforum.movidius.com/discussion/1128/incorrect-shape-size-set-for-2d-output-tensor)
